@@ -1,16 +1,16 @@
-import { useCallback, useEffect } from "react";
-import { useForm, watch } from "react-hook-form";
-import { Button, Select, Input, RTE } from "../index";
+import React, { useCallback } from "react";
+import { useForm } from "react-hook-form";
+import { Button, Input, RTE, Select } from "..";
 import appwriteService from "../../appwrite/config";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 export default function PostForm({ post }) {
-  const { register, setValue, getValues, control, handleSubmit, watch } =
+  const { register, handleSubmit, watch, setValue, control, getValues } =
     useForm({
       defaultValues: {
         title: post?.title || "",
-        slug: post?.slug || "",
+        slug: post?.$id || "",
         content: post?.content || "",
         status: post?.status || "active",
       },
@@ -22,7 +22,7 @@ export default function PostForm({ post }) {
   const submit = async (data) => {
     if (post) {
       const file = data.image[0]
-        ? appwriteService.uploadFile(data.image[0])
+        ? await appwriteService.uploadFile(data.image[0])
         : null;
 
       if (file) {
@@ -38,18 +38,17 @@ export default function PostForm({ post }) {
         navigate(`/post/${dbPost.$id}`);
       }
     } else {
-      const file = data.image[0]
-        ? await appwriteService.uploadFile(data.image[0])
-        : null;
+      const file = await appwriteService.uploadFile(data.image[0]);
 
       if (file) {
         const fileId = file.$id;
         data.featuredImage = fileId;
         const dbPost = await appwriteService.createPost({
           ...data,
-          userId: userData ? userData.$id : undefined,
+          userId: userData.$id,
         });
-        if (post) {
+
+        if (dbPost) {
           navigate(`/post/${dbPost.$id}`);
         }
       }
@@ -57,30 +56,24 @@ export default function PostForm({ post }) {
   };
 
   const slugTransform = useCallback((value) => {
-    if (value && typeof value === "string") {
+    if (value && typeof value === "string")
       return value
         .trim()
         .toLowerCase()
-        .replace(/^[a-zA-Z\d\s]+/g, "-")
+        .replace(/[^a-zA-Z\d\s]+/g, "-")
         .replace(/\s/g, "-");
-    }
+
     return "";
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const subscription = watch((value, { name }) => {
       if (name === "title") {
-        setValue(
-          "slug",
-          slugTransform(value.title, {
-            shouldValidate: true,
-          })
-        );
+        setValue("slug", slugTransform(value.title), { shouldValidate: true });
       }
     });
-    return () => {
-      subscription.unsubscribe();
-    };
+
+    return () => subscription.unsubscribe();
   }, [watch, slugTransform, setValue]);
 
   return (
