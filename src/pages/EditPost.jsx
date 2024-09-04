@@ -4,9 +4,12 @@ import {  Container, PostForm } from "../components/index";
 import AppwriteService from "../appwrite/config";
 
 function EditPost() {
+  
   const [post, setPost] = useState(null);
   const { slug } = useParams();
   const navigate = useNavigate();
+
+
   useEffect(() => {
     if (slug) {
       AppwriteService.getPost(slug).then((post) => {

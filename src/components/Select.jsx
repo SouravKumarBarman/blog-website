@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { forwardRef } from "react";
 
 function Select({ options, className="", label,...props }, ref) {
     const id=useId
@@ -18,4 +19,4 @@ function Select({ options, className="", label,...props }, ref) {
   )
 }
 
-export default Select;
+export default forwardRef(Select);

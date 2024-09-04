@@ -68,7 +68,7 @@ export class Service {
 
     async getPost(slug) {
         try {
-            await this.databases.getDocument(
+            return await this.databases.getDocument(
                 conf.appwriteDatabaseId, // databaseId
                 conf.appwriteCollectionId, // collectionId
                 slug // documentId
@@ -80,10 +80,10 @@ export class Service {
 
     async getPosts(queries = [Query.equal("status", "active")]) {
         try {
-            await this.databases.listDocuments(
+            return await this.databases.listDocuments(
                 conf.appwriteDatabaseId,
                 conf.appwriteCollectionId,
-                queries
+                queries,
             )
         } catch (error) {
             console.log("Appwrite::getPosts::error", error)
@@ -94,21 +94,20 @@ export class Service {
 
     //file upload services
 
-    async uploadFile(file){
+    async uploadFile(file) {
         try {
-            await this.bucket.createFile(
+            return await this.bucket.createFile(
                 conf.appwriteBucketId,
                 ID.unique(),
-                file 
+                file
             )
-            return true
         } catch (error) {
-            console.log("Appwrite service::uploadFile::error",error);
+            console.log("Appwrite service::uploadFile::error", error);
             return false
         }
     }
 
-    async deleteFile(fileId){
+    async deleteFile(fileId) {
         try {
             await this.bucket.deleteFile(
                 conf.appwriteBucketId,
@@ -116,12 +115,12 @@ export class Service {
             )
             return true
         } catch (error) {
-            console.log("Appwrite::deleteFile::error",error)
+            console.log("Appwrite::deleteFile::error", error)
             return false
         }
     }
 
-    getFilePreview(fileId){
+    getFilePreview(fileId) {
         return this.bucket.getFilePreview(
             conf.appwriteBucketId,
             fileId

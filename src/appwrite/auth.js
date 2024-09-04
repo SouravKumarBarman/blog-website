@@ -18,7 +18,7 @@ export class AuthService {
             const userAccount = await this.account.create(ID.unique(), email, password, name);
             if (userAccount) {
                 //call another method , as after successful user creation user gets logged in automatically
-                this.login({email, password})
+                return this.login({email, password})
             } else {
                 return userAccount
             }
@@ -30,7 +30,7 @@ export class AuthService {
     async login({email, password}){
         // eslint-disable-next-line no-useless-catch
         try {
-            return await this.account.createEmailSession(email, password);
+            return await this.account.createEmailPasswordSession(email, password);
         } catch (error) {
             throw error;
         }
