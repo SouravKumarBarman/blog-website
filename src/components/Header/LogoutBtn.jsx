@@ -7,6 +7,8 @@ function LogoutBtn() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  //logout from the appwrite service
+  //dispatch the logout action to update the state in the store
   const logoutHandler = async() => {
     await authService.logout().then(() => {dispatch(logout())});
     navigate("/");

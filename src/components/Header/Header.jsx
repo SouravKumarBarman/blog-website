@@ -8,6 +8,7 @@ function Header() {
 
   const navigate = useNavigate();
 
+  //navigation items change based on the authentication status
   const navItems = [
     {
       name: "Home",
@@ -43,7 +44,7 @@ function Header() {
         <nav className="flex">
           <div className="mr-4">
             <Link to="/">
-              <Logo width="70px" />
+              <Logo width="30px" />
             </Link>
           </div>
           <ul className="flex ml-auto">
@@ -59,9 +60,10 @@ function Header() {
                 </li>
               ) : null
             )}
+
             {authStatus && (
               <li>
-                <LogoutBtn />
+                <LogoutBtn />  
               </li>
             )}
           </ul>
