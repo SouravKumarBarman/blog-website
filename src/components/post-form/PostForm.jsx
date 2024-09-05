@@ -1,4 +1,6 @@
-import React, { useCallback } from "react";
+/* eslint-disable react/prop-types */
+
+import  { useCallback , useEffect} from "react";
 import { useForm } from "react-hook-form";
 import { Button, Input, RTE, Select } from "../index";
 import appwriteService from "../../appwrite/config";
@@ -6,6 +8,13 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 export default function PostForm({ post }) {
+  //useForm is a custom hook that returns an object with methods and properties to control the form
+  //register is a function that registers an input element to the form
+  //handleSubmit: Function to handle form submission.
+  //watch: Used to watch specific form values (e.g., the title field)
+  //setValue: Used to programmatically set form values (e.g., for auto-generating the slug).
+  //control: For controlling custom form components like RTE (rich text editor).
+  //getValues: For getting values of specific form fields.
   const { register, handleSubmit, watch, setValue, control, getValues } =
     useForm({
       defaultValues: {
@@ -19,12 +28,16 @@ export default function PostForm({ post }) {
   const navigate = useNavigate();
   const userData = useSelector((state) => state.auth.userData);
 
+  //submit form does the following:
+  //1. If post is present, it updates the post with the new data and navigates to the post page
   const submit = async (data) => {
     if (post) {
+      //It uploads a new image (if any) and deletes the old image
       const file = data.image[0]
         ? await appwriteService.uploadFile(data.image[0])
         : null;
 
+      //if new file is uploaded, delete the old file
       if (file) {
         appwriteService.deleteFile(post.featuredImage);
       }
@@ -37,7 +50,9 @@ export default function PostForm({ post }) {
       if (dbPost) {
         navigate(`/post/${dbPost.$id}`);
       }
-    } else {
+    }
+    //2. If post is not present, it uploads the image file and creates a new post with the data and navigates to the post page
+    else {
       const file = await appwriteService.uploadFile(data.image[0]);
 
       if (file) {
@@ -45,7 +60,7 @@ export default function PostForm({ post }) {
         data.featuredImage = fileId;
         const dbPost = await appwriteService.createPost({
           ...data,
-          userId: userData.$id,
+          userId: userData.$id,     //userId is added to the post data so that it can be used to display the author of the post
         });
 
         if (dbPost) {
@@ -55,6 +70,8 @@ export default function PostForm({ post }) {
     }
   };
 
+  //useCallback is a React Hook that lets you cache a function definition between re-renders.
+  //used to optimize custom hook functions
   const slugTransform = useCallback((value) => {
     if (value && typeof value === "string")
       return value
@@ -66,14 +83,16 @@ export default function PostForm({ post }) {
     return "";
   }, []);
 
-  React.useEffect(() => {
+  //useEffect is a React Hook that lets you perform side effects in function components.
+
+  useEffect(() => {
     const subscription = watch((value, { name }) => {
       if (name === "title") {
         setValue("slug", slugTransform(value.title), { shouldValidate: true });
       }
     });
-
     return () => subscription.unsubscribe();
+    
   }, [watch, slugTransform, setValue]);
 
   return (
